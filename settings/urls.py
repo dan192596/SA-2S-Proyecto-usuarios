@@ -16,6 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from Usuario.views import LoginView, UserView, CreateUserView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login', LoginView.as_view(), name='get_quantity'),
+    path('jugadores', CreateUserView.as_view(), name='create_user'),
+    path('jugadores/<int:id_user>', UserView.as_view(), name='edit_get_user'),
 ]
