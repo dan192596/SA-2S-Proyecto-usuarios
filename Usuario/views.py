@@ -8,6 +8,8 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
 
+from .serializers import UserSerializer
+
 import requests
 import random
 import os
@@ -17,19 +19,19 @@ class LoginView(APIView):
 
     permission_classes = [AllowAny]
 
-    def post(self, request):
-        if not 'email' in request.data or not 'password' in request.data:
+    def get(self, request):
+        if not 'email' in request.query_params or not 'password' in request.query_params:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        if not User.objects.filter(email = request.data['email']).exists():
+        if not User.objects.filter(email = request.query_params['email']).exists():
             return Response({"detail":"Usuario o contraseña no coinciden"}, status=status.HTTP_400_BAD_REQUEST)
-        MyUser = User.objects.get(email = request.data['email'])
-        if check_password(request.data['password'], MyUser.password):
+        MyUser = User.objects.get(email = request.query_params['email'])
+        if check_password(request.query_params['password'], MyUser.password):
             user = MyUser
             response = {
                 "id":user.username,
                 "nombres":user.first_name,
                 "apellidos":user.last_name,
-                "administrator":user.is_superuser
+                "administrador":user.is_superuser
             }            
             return Response(response, status=status.HTTP_200_OK)
         else:
@@ -49,7 +51,7 @@ class UserView(APIView):
             "id":user.username,
             "nombres":user.first_name,
             "apellidos":user.last_name,
-            "administrator":user.is_superuser
+            "administrador":user.is_superuser
         }            
         return Response(response, status=status.HTTP_200_OK)
 
@@ -69,7 +71,7 @@ class UserView(APIView):
             "id":user.username,
             "nombres":user.first_name,
             "apellidos":user.last_name,
-            "administrator":user.is_superuser
+            "administrador":user.is_superuser
         }
         return Response(response, status=status.HTTP_201_CREATED)
     
@@ -94,6 +96,14 @@ class CreateUserView(APIView):
             "id":user.username,
             "nombres":user.first_name,
             "apellidos":user.last_name,
-            "administrator":user.is_superuser
+            "administrador":user.is_superuser
         }
         return Response(response, status=status.HTTP_201_CREATED)
+
+    def get(self, request):        
+        user = User.objects.all()
+        serializer = UserSerializer(user, many=True, context={'request': request})
+        response = {
+            "usuarios":serializer.data
+        }
+        return Response(response, status=status.HTTP_200_OK)
