@@ -17,6 +17,7 @@ services:
     ports:
       - "8000:8000"
     environment: 
-      - PUBLIC_JWT=AQUIDEBEIRLALLAVEPUBLICA
+      - PUBLIC_JWT=oauth-public.key
+      - REVISAR_JWT=True
     depends_on:
       - db_usuarios
