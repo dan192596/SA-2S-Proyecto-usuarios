@@ -23,11 +23,31 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
+        if os.environ['REVISAR_JWT'] =='True':
+            try:
+                authorizationHeader = request.META.get('HTTP_AUTHORIZATION')
+                token = authorizationHeader.split()            
+                f = open(os.environ['PUBLIC_JWT'], "r")
+                public_key = f.read()
+                jwt.unregister_algorithm('RS256')
+                jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
+                data = jwt.decode(token[1], public_key, audience='2' ,algorithm='RS256')
+                valid = False                
+                for scope in data['scopes']:
+                    if scope == "usuarios.login":
+                        valid = True
+                print("Scopes de token "+str(data['scopes']))
+                print("El scope buscado es usuarios.login, el token es "+str(valid))
+                if not valid:
+                    return Response(status=status.HTTP_401_UNAUTHORIZED)
+            except:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
         if not 'email' in request.query_params or not 'password' in request.query_params:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         if not User.objects.filter(email = request.query_params['email']).exists():
             return Response({"detail":"Usuario o contraseña no coinciden"}, status=status.HTTP_400_BAD_REQUEST)
         MyUser = User.objects.get(email = request.query_params['email'])
+        print("Login de: "+request.query_params['email'])
         if check_password(request.query_params['password'], MyUser.password):
             user = MyUser
             response = {
@@ -35,9 +55,11 @@ class LoginView(APIView):
                 "nombres":user.first_name,
                 "apellidos":user.last_name,
                 "administrador":user.is_superuser
-            }            
+            }
+            print("Usuario valido: "+str(response))
             return Response(response, status=status.HTTP_200_OK)
         else:
+            print("Usuario no valido")
             return Response({"detail":"Usuario o contraseña no coinciden"}, status=status.HTTP_400_BAD_REQUEST)        
         return Response(status=status.HTTP_200_OK)
 
@@ -60,6 +82,8 @@ class UserView(APIView):
                 for scope in data['scopes']:
                     if scope == "usuarios.jugadores.get":
                         valid = True
+                print("Scopes de token "+str(data['scopes']))
+                print("El scope buscado es usuarios.jugadores.get, el token es "+str(valid))
                 if not valid:
                     print("Token invalido")
                     return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -74,7 +98,8 @@ class UserView(APIView):
             "nombres":user.first_name,
             "apellidos":user.last_name,
             "administrador":user.is_superuser
-        }            
+        }
+        print("get usuario: "+str(response))
         return Response(response, status=status.HTTP_200_OK)
 
     def put(self, request, id_user):
@@ -89,8 +114,10 @@ class UserView(APIView):
                 data = jwt.decode(token[1], public_key, audience='2' ,algorithm='RS256')
                 valid = False            
                 for scope in data['scopes']:
-                    if scope == "torneos.partida.put":
+                    if scope == "usuarios.jugadores.put":
                         valid = True
+                print("Scopes de token "+str(data['scopes']))
+                print("El scope buscado es usuarios.partida.put, el token es "+str(valid))
                 if not valid:
                     print("Token invalido")
                     return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -114,6 +141,7 @@ class UserView(APIView):
             "apellidos":user.last_name,
             "administrador":user.is_superuser
         }
+        print("usuario actualizado: "+str(response))
         return Response(response, status=status.HTTP_201_CREATED)
     
 class CreateUserView(APIView):
@@ -132,8 +160,10 @@ class CreateUserView(APIView):
                 data = jwt.decode(token[1], public_key, audience='2' ,algorithm='RS256')
                 valid = False            
                 for scope in data['scopes']:
-                    if scope == "torneos.partida.post":
+                    if scope == "usuarios.jugadores.post":
                         valid = True
+                print("Scopes de token "+str(data['scopes']))
+                print("El scope buscado es usuarios.jugadores.post, el token es "+str(valid))
                 if not valid:
                     print("Token invalido")
                     return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -156,8 +186,10 @@ class CreateUserView(APIView):
             "id":user.username,
             "nombres":user.first_name,
             "apellidos":user.last_name,
-            "administrador":user.is_superuser
+            "administrador":user.is_superuser,
+            "email":user.email
         }
+        print("Usuario creado "+str(response))
         return Response(response, status=status.HTTP_201_CREATED)
 
     def get(self, request):
@@ -172,8 +204,10 @@ class CreateUserView(APIView):
                 data = jwt.decode(token[1], public_key, audience='2' ,algorithm='RS256')
                 valid = False            
                 for scope in data['scopes']:
-                    if scope == "torneos.partida.get":
+                    if scope == "usuarios.jugadores.get":
                         valid = True
+                print("Scopes de token "+str(data['scopes']))
+                print("El scope buscado es usuarios.jugadores.get, el token es "+str(valid))
                 if not valid:
                     print("Token invalido")
                     return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -185,4 +219,5 @@ class CreateUserView(APIView):
         response = {
             "usuarios":serializer.data
         }
+        print("Lista de usuarios "+str(response))
         return Response(serializer.data, status=status.HTTP_200_OK)
