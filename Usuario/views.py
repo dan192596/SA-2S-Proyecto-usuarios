@@ -23,32 +23,29 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        if os.environ['REVISAR_JWT'] =='True':
-            try:
-                authorizationHeader = request.META.get('HTTP_AUTHORIZATION')
-                token = authorizationHeader.split()            
-                f = open(os.environ['PUBLIC_JWT'], "r")
-                public_key = f.read()
-                jwt.unregister_algorithm('RS256')
-                jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
-                jwt_options = {
+        if os.environ['REVISAR_JWT'] =='True':            
+            authorizationHeader = request.META.get('HTTP_AUTHORIZATION')
+            token = authorizationHeader.split()            
+            f = open(os.environ['PUBLIC_JWT'], "r")
+            public_key = f.read()
+            jwt.unregister_algorithm('RS256')
+            jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
+            jwt_options = {
                     'verify_signature': False,
                     'verify_exp': False,
                     'verify_nbf': False,
                     'verify_iat': False,
                     'verify_aud': False
                 }
-                data = jwt.decode(token[1], public_key, options=jwt_options, algorithm='RS256')
-                valid = False                
-                for scope in data['scopes']:
-                    if scope == "usuarios.login":
-                        valid = True
-                print("Scopes de token "+str(data['scopes']))
-                print("El scope buscado es usuarios.login, el token es "+str(valid))
-                if not valid:
-                    return Response(status=status.HTTP_401_UNAUTHORIZED)
-            except:
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            data = jwt.decode(token[1], public_key, options=jwt_options, algorithm='RS256')
+            valid = False                
+            for scope in data['scopes']:
+                if scope == "usuarios.login":
+                    valid = True
+            print("Scopes de token "+str(data['scopes']))
+            print("El scope buscado es usuarios.login, el token es "+str(valid))
+            if not valid:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)            
         if not 'email' in request.query_params or not 'password' in request.query_params:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         if not User.objects.filter(email = request.query_params['email']).exists():
