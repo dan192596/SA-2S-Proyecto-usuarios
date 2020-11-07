@@ -31,7 +31,14 @@ class LoginView(APIView):
                 public_key = f.read()
                 jwt.unregister_algorithm('RS256')
                 jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
-                data = jwt.decode(token[1], public_key, audience='2' ,algorithm='RS256')
+                jwt_options = {
+                    'verify_signature': False,
+                    'verify_exp': False,
+                    'verify_nbf': False,
+                    'verify_iat': False,
+                    'verify_aud': False
+                }
+                data = jwt.decode(token[1], public_key, options=jwt_options, algorithm='RS256')
                 valid = False                
                 for scope in data['scopes']:
                     if scope == "usuarios.login":
@@ -77,7 +84,14 @@ class UserView(APIView):
                 public_key = f.read()
                 jwt.unregister_algorithm('RS256')
                 jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
-                data = jwt.decode(token[1], public_key, audience='2' ,algorithm='RS256')
+                jwt_options = {
+                    'verify_signature': False,
+                    'verify_exp': False,
+                    'verify_nbf': False,
+                    'verify_iat': False,
+                    'verify_aud': False
+                }
+                data = jwt.decode(token[1], public_key, options=jwt_options, algorithm='RS256')
                 valid = False            
                 for scope in data['scopes']:
                     if scope == "usuarios.jugadores.get":
@@ -111,7 +125,14 @@ class UserView(APIView):
                 public_key = f.read()
                 jwt.unregister_algorithm('RS256')
                 jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
-                data = jwt.decode(token[1], public_key, audience='2' ,algorithm='RS256')
+                jwt_options = {
+                    'verify_signature': False,
+                    'verify_exp': False,
+                    'verify_nbf': False,
+                    'verify_iat': False,
+                    'verify_aud': False
+                }
+                data = jwt.decode(token[1], public_key, options=jwt_options, algorithm='RS256')
                 valid = False            
                 for scope in data['scopes']:
                     if scope == "usuarios.jugadores.put":
@@ -157,7 +178,14 @@ class CreateUserView(APIView):
                 public_key = f.read()
                 jwt.unregister_algorithm('RS256')
                 jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
-                data = jwt.decode(token[1], public_key, audience='2' ,algorithm='RS256')
+                jwt_options = {
+                    'verify_signature': False,
+                    'verify_exp': False,
+                    'verify_nbf': False,
+                    'verify_iat': False,
+                    'verify_aud': False
+                }
+                data = jwt.decode(token[1], public_key, options=jwt_options, algorithm='RS256')
                 valid = False            
                 for scope in data['scopes']:
                     if scope == "usuarios.jugadores.post":
@@ -201,7 +229,14 @@ class CreateUserView(APIView):
                 public_key = f.read()
                 jwt.unregister_algorithm('RS256')
                 jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
-                data = jwt.decode(token[1], public_key, audience='2' ,algorithm='RS256')
+                jwt_options = {
+                    'verify_signature': False,
+                    'verify_exp': False,
+                    'verify_nbf': False,
+                    'verify_iat': False,
+                    'verify_aud': False
+                }
+                data = jwt.decode(token[1], public_key, options=jwt_options, algorithm='RS256')
                 valid = False            
                 for scope in data['scopes']:
                     if scope == "usuarios.jugadores.get":
